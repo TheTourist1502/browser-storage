@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>sessionStorage Demo — Shopping Cart</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>🛒 Shopping Cart</h1>
+  <p class="subtitle">Cart data lives in sessionStorage — it clears when you close this tab.</p>
+
+  <div class="layout">
+    <div>
+      <h2>Products</h2>
+      <div class="products" id="productList"></div>
+    </div>
+
+    <div class="cart-panel">
+      <h2>Your Cart</h2>
+      <div class="cart-items" id="cartItems"></div>
+      <div class="cart-total">
+        <span>Total</span>
+        <span class="total-price" id="cartTotal">$0</span>
+      </div>
+      <button class="btn-checkout" onclick="checkout()">Checkout →</button>
+      <button class="btn-clear" onclick="clearCart()">Clear Cart</button>
+    </div>
+  </div>
+
+  <div class="session-note">
+    <strong>How sessionStorage works here:</strong><br>
+    Add items → open DevTools → Application → Session Storage → see the raw JSON.<br>
+    Close this tab and reopen → cart is empty. Keep the tab → cart persists across refreshes.
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
