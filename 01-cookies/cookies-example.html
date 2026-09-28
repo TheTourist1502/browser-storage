@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cookies Demo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #0f172a; color: #e2e8f0; padding: 2rem; }
+    h1 { color: #f59e0b; margin-bottom: 1.5rem; }
+    h2 { color: #94a3b8; margin: 1.5rem 0 0.75rem; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .card { background: #1e293b; border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid #334155; }
+    .row { display: flex; gap: 0.75rem; margin-bottom: 0.75rem; flex-wrap: wrap; }
+    input { flex: 1; min-width: 120px; padding: 0.5rem 0.75rem; background: #0f172a; border: 1px solid #475569; border-radius: 6px; color: #e2e8f0; font-size: 0.9rem; }
+    input:focus { outline: none; border-color: #f59e0b; }
+    button { padding: 0.5rem 1rem; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 500; }
+    .btn-set { background: #f59e0b; color: #0f172a; }
+    .btn-get { background: #3b82f6; color: #fff; }
+    .btn-del { background: #ef4444; color: #fff; }
+    .btn-list { background: #8b5cf6; color: #fff; }
+    button:hover { opacity: 0.85; }
+    #output { background: #0f172a; border: 1px solid #334155; border-radius: 6px; padding: 1rem; min-height: 80px; font-family: monospace; font-size: 0.85rem; white-space: pre-wrap; color: #86efac; }
+    .remember-box { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.75rem; }
+    .tag { display: inline-block; background: #1e3a5f; color: #93c5fd; border-radius: 4px; padding: 0.15rem 0.5rem; font-size: 0.78rem; margin: 0.2rem; }
+  </style>
+</head>
+<body>
+  <h1>🍪 Cookies Demo</h1>
+
+  <div class="card">
+    <h2>Set Cookie</h2>
+    <div class="row">
+      <input id="cookieName" placeholder="Name" value="username">
+      <input id="cookieValue" placeholder="Value" value="john_doe">
+      <input id="cookieDays" placeholder="Days (blank = session)" type="number" value="7" style="max-width:160px">
+      <button class="btn-set" onclick="handleSet()">Set Cookie</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Get / Delete Cookie</h2>
+    <div class="row">
+      <input id="cookieGetName" placeholder="Cookie name" value="username">
+      <button class="btn-get" onclick="handleGet()">Get</button>
+      <button class="btn-del" onclick="handleDelete()">Delete</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>List All Cookies</h2>
+    <button class="btn-list" onclick="handleList()">List All</button>
+  </div>
+
+  <div class="card">
+    <h2>"Remember Me" Example</h2>
+    <div class="row">
+      <input id="loginUser" placeholder="Username" value="alice">
+      <input id="loginPass" placeholder="Password" type="password" value="secret">
+    </div>
+    <div class="remember-box">
+      <input id="rememberMe" type="checkbox" checked style="width:auto;min-width:auto;flex:none">
+      <label for="rememberMe">Remember me for 30 days</label>
+    </div>
+    <div class="row" style="margin-top:0.75rem">
+      <button class="btn-set" onclick="handleLogin()">Login</button>
+      <button class="btn-del" onclick="handleLogout()">Logout</button>
+    </div>
+    <p style="margin-top:0.5rem;color:#64748b;font-size:0.82rem">
+      <span class="tag">HttpOnly</span><span class="tag">Secure</span><span class="tag">SameSite=Strict</span>
+      set by server — JS demo sets a client cookie only for illustration
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>Output</h2>
+    <div id="output">Output will appear here…</div>
+  </div>
+
+  <script src="cookies-utils.js"></script>
+  <script>
+    const out = document.getElementById('output');
+    const log = msg => { out.textContent = msg; };
+
+    function handleSet() {
+      const name = document.getElementById('cookieName').value.trim();
+      const value = document.getElementById('cookieValue').value.trim();
+      const days = Number(document.getElementById('cookieDays').value) || undefined;
+      if (!name) return log('❌ Name required');
+      setCookie(name, value, days);
+      log(`✅ Set cookie:\n  name: "${name}"\n  value: "${value}"\n  expires: ${days ? days + ' day(s)' : 'session'}`);
+    }
+
+    function handleGet() {
+      const name = document.getElementById('cookieGetName').value.trim();
+      const val = getCookie(name);
+      log(val !== null ? `✅ "${name}" = "${val}"` : `❌ Cookie "${name}" not found`);
+    }
+
+    function handleDelete() {
+      const name = document.getElementById('cookieGetName').value.trim();
+      deleteCookie(name);
+      log(`🗑️ Deleted cookie: "${name}"`);
+    }
+
+    function handleList() {
+      const cookies = listAllCookies();
+      if (!cookies.length) { log('(no cookies set on this page)'); return; }
+      log(cookies.map(c => `• ${c.name} = ${c.value}`).join('\n'));
+    }
+
+    function handleLogin() {
+      const user = document.getElementById('loginUser').value.trim();
+      const remember = document.getElementById('rememberMe').checked;
+      setCookie('session_user', user, remember ? 30 : undefined);
+      log(`✅ Logged in as "${user}"\n   Cookie expires: ${remember ? '30 days' : 'session end'}\n\n⚠️  Real apps: server sets HttpOnly+Secure cookie — never store passwords client-side.`);
+    }
+
+    function handleLogout() {
+      deleteCookie('session_user');
+      log('👋 Logged out — session_user cookie deleted');
+    }
+
+    // Show existing session cookie on load
+    const existing = getCookie('session_user');
+    if (existing) log(`👤 Welcome back, "${existing}"\n   (Loaded from cookie)`);
+  </script>
+</body>
+</html>
