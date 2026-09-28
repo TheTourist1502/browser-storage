@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Safe Storage Demo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #0f172a; color: #e2e8f0; padding: 2rem; }
+    h1 { color: #ef4444; margin-bottom: 0.25rem; }
+    .subtitle { color: #64748b; font-size: 0.88rem; margin-bottom: 2rem; }
+
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 1.5rem; margin-bottom: 1.5rem; }
+    h2 { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 1rem; }
+    textarea, input[type=text] { width: 100%; padding: 0.6rem 0.75rem; background: #0f172a; border: 1px solid #475569; border-radius: 6px; color: #e2e8f0; font-size: 0.88rem; margin-bottom: 0.75rem; font-family: inherit; }
+    textarea { min-height: 80px; resize: vertical; }
+    textarea:focus, input:focus { outline: none; border-color: #ef4444; }
+    .row { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    button { padding: 0.5rem 1rem; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500; }
+    .btn-bad { background: #ef4444; color: #fff; }
+    .btn-good { background: #10b981; color: #fff; }
+    button:hover { opacity: 0.85; }
+    .output { background: #0f172a; border: 1px solid #334155; border-radius: 6px; padding: 1rem; margin-top: 0.75rem; min-height: 60px; font-size: 0.88rem; }
+    .label-bad { color: #f87171; font-size: 0.78rem; margin-bottom: 0.25rem; }
+    .label-good { color: #86efac; font-size: 0.78rem; margin-bottom: 0.25rem; }
+    .warn-box { background: #451a03; border: 1px solid #92400e; border-radius: 6px; padding: 0.75rem 1rem; margin-bottom: 0.75rem; font-size: 0.83rem; color: #fcd34d; }
+  </style>
+</head>
+<body>
+  <h1>🔒 Safe Storage Demo</h1>
+  <p class="subtitle">See the difference between safe and unsafe ways to render storage data.</p>
+
+  <div class="card">
+    <h2>XSS via innerHTML (vulnerable vs safe)</h2>
+    <div class="warn-box">
+      Try this payload: <code>&lt;img src=x onerror="alert('XSS!')"&gt;</code>
+    </div>
+    <textarea id="xssInput" placeholder="Enter text or HTML payload…"><img src=x onerror="alert('XSS!')"></textarea>
+    <div class="row">
+      <button class="btn-bad" onclick="renderBad()">❌ Unsafe (innerHTML)</button>
+      <button class="btn-good" onclick="renderGood()">✅ Safe (textContent)</button>
+    </div>
+    <div class="label-bad">❌ innerHTML output (executes scripts):</div>
+    <div class="output" id="badOutput"></div>
+    <div class="label-good" style="margin-top:0.75rem">✅ textContent output (literal text):</div>
+    <div class="output" id="goodOutput"></div>
+  </div>
+
+  <div class="card">
+    <h2>Safe Storage Write / Read</h2>
+    <input type="text" id="storageKey" placeholder="Key" value="userComment">
+    <textarea id="storageValue" placeholder="Value (try injecting HTML)…"><b>Bold</b> and <script>alert(1)</script></textarea>
+    <div class="row">
+      <button class="btn-good" onclick="safeWrite()">Save to localStorage</button>
+      <button class="btn-bad" onclick="unsafeRead()">❌ Read + innerHTML</button>
+      <button class="btn-good" onclick="safeRead()">✅ Read + textContent</button>
+    </div>
+    <div class="output" id="storageOutput">Output appears here…</div>
+  </div>
+
+  <script src="sanitization.js"></script>
+  <script>
+    const $ = id => document.getElementById(id);
+
+    function renderBad() {
+      const val = $('xssInput').value;
+      localStorage.setItem('testVal', val);
+      $('badOutput').innerHTML = val; // ❌ executes scripts
+    }
+
+    function renderGood() {
+      const val = $('xssInput').value;
+      $('goodOutput').textContent = val; // ✅ literal text
+    }
+
+    function safeWrite() {
+      const key = $('storageKey').value.trim();
+      const val = $('storageValue').value;
+      if (!key) return;
+      safeStorageSet(key, val);
+      $('storageOutput').textContent = `Saved "${key}" to localStorage.`;
+    }
+
+    function unsafeRead() {
+      const key = $('storageKey').value.trim();
+      const val = safeStorageGet(key);
+      $('storageOutput').innerHTML = val ?? '(not found)'; // ❌
+    }
+
+    function safeRead() {
+      const key = $('storageKey').value.trim();
+      const val = safeStorageGet(key);
+      $('storageOutput').textContent = val ?? '(not found)'; // ✅
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Storage Comparison</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #0f172a; color: #e2e8f0; padding: 2rem; }
+    h1 { color: #a78bfa; margin-bottom: 0.25rem; }
+    .subtitle { color: #64748b; font-size: 0.88rem; margin-bottom: 2rem; }
+
+    table { width: 100%; border-collapse: collapse; margin-bottom: 2rem; font-size: 0.88rem; }
+    th { padding: 0.75rem 1rem; text-align: left; border-bottom: 2px solid #334155; color: #94a3b8; font-weight: 600; }
+    td { padding: 0.75rem 1rem; border-bottom: 1px solid #1e293b; vertical-align: top; }
+    tr:hover td { background: #1e293b; }
+    th:first-child, td:first-child { color: #94a3b8; font-weight: 500; }
+    .yes { color: #86efac; }
+    .no { color: #f87171; }
+    .neutral { color: #fbbf24; }
+
+    h2 { color: #94a3b8; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; margin: 2rem 0 1rem; }
+
+    .decision-tree {
+      background: #1e293b;
+      border-radius: 12px;
+      padding: 1.5rem;
+      border: 1px solid #334155;
+      font-size: 0.88rem;
+      line-height: 2;
+    }
+    .q { color: #a78bfa; font-weight: 600; }
+    .a { color: #86efac; margin-left: 1.5rem; }
+    .a::before { content: "→ "; color: #64748b; }
+
+    .live-panel {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .storage-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 1.25rem;
+    }
+    .storage-card h3 { margin-bottom: 0.75rem; font-size: 0.95rem; }
+    .storage-card p { color: #64748b; font-size: 0.8rem; margin-bottom: 0.5rem; }
+    .storage-card .count { font-size: 1.5rem; font-weight: 700; }
+    .cookie-count { color: #f59e0b; }
+    .local-count { color: #6366f1; }
+    .session-count { color: #10b981; }
+    button { padding: 0.4rem 0.75rem; border: none; border-radius: 6px; cursor: pointer; font-size: 0.8rem; background: #334155; color: #e2e8f0; margin-top: 0.5rem; }
+    button:hover { background: #475569; }
+  </style>
+</head>
+<body>
+  <h1>📊 Storage Comparison</h1>
+  <p class="subtitle">Cookies vs localStorage vs sessionStorage — at a glance.</p>
+
+  <h2>Live Storage Info</h2>
+  <div class="live-panel">
+    <div class="storage-card">
+      <h3>🍪 Cookies</h3>
+      <p>Sent with every HTTP request</p>
+      <div class="count cookie-count" id="cookieCount">—</div>
+      <p>items</p>
+      <button onclick="refreshCounts()">Refresh</button>
+    </div>
+    <div class="storage-card">
+      <h3>💾 localStorage</h3>
+      <p>Persists until cleared</p>
+      <div class="count local-count" id="localCount">—</div>
+      <p>items · <span id="localSize">0</span> KB used</p>
+    </div>
+    <div class="storage-card">
+      <h3>⏱️ sessionStorage</h3>
+      <p>Clears on tab close</p>
+      <div class="count session-count" id="sessionCount">—</div>
+      <p>items · <span id="sessionSize">0</span> KB used</p>
+    </div>
+  </div>
+
+  <h2>Feature Matrix</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Feature</th>
+        <th>🍪 Cookies</th>
+        <th>💾 localStorage</th>
+        <th>⏱️ sessionStorage</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Capacity</td><td>~4 KB</td><td>~5–10 MB</td><td>~5–10 MB</td></tr>
+      <tr><td>Persists across restarts</td><td class="yes">✅ (with expiry)</td><td class="yes">✅ Always</td><td class="no">❌ Tab only</td></tr>
+      <tr><td>Shared across tabs</td><td class="yes">✅ Same origin</td><td class="yes">✅ Same origin</td><td class="no">❌ Each tab isolated</td></tr>
+      <tr><td>Sent to server</td><td class="yes">✅ Automatic</td><td class="no">❌ Never</td><td class="no">❌ Never</td></tr>
+      <tr><td>Server can set it</td><td class="yes">✅ Set-Cookie header</td><td class="no">❌</td><td class="no">❌</td></tr>
+      <tr><td>HttpOnly support</td><td class="yes">✅</td><td class="no">❌</td><td class="no">❌</td></tr>
+      <tr><td>XSS risk</td><td class="neutral">⚠️ Without HttpOnly</td><td class="no">❌ Always readable by JS</td><td class="no">❌ Always readable by JS</td></tr>
+      <tr><td>Size limit</td><td class="no">❌ Very small</td><td class="yes">✅ Large</td><td class="yes">✅ Large</td></tr>
+      <tr><td>API ease of use</td><td class="neutral">⚠️ Verbose string API</td><td class="yes">✅ Simple</td><td class="yes">✅ Simple</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Decision Tree — Which Storage to Use?</h2>
+  <div class="decision-tree">
+    <div class="q">Does the server need to read it?</div>
+    <div class="a">Yes → Use a Cookie (HttpOnly + Secure if it's auth)</div>
+
+    <div class="q">Should it survive closing the browser?</div>
+    <div class="a">Yes → localStorage</div>
+    <div class="a">No → sessionStorage</div>
+
+    <div class="q">Should it be isolated per tab?</div>
+    <div class="a">Yes → sessionStorage</div>
+    <div class="a">No → localStorage</div>
+
+    <div class="q">Is it an auth token?</div>
+    <div class="a">Yes → HttpOnly Cookie set by server (never localStorage)</div>
+  </div>
+
+  <script>
+    function storageSize(storage) {
+      let bytes = 0;
+      for (let k in storage) {
+        if (Object.prototype.hasOwnProperty.call(storage, k))
+          bytes += k.length + storage[k].length;
+      }
+      return (bytes / 1024).toFixed(1);
+    }
+
+    function refreshCounts() {
+      const cookieCount = document.cookie ? document.cookie.split(';').filter(Boolean).length : 0;
+      document.getElementById('cookieCount').textContent = cookieCount;
+      document.getElementById('localCount').textContent = localStorage.length;
+      document.getElementById('sessionCount').textContent = sessionStorage.length;
+      document.getElementById('localSize').textContent = storageSize(localStorage);
+      document.getElementById('sessionSize').textContent = storageSize(sessionStorage);
+    }
+
+    refreshCounts();
+  </script>
+</body>
+</html>

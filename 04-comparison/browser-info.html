@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browser Storage Info</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #0f172a; color: #e2e8f0; padding: 2rem; }
+    h1 { color: #38bdf8; margin-bottom: 2rem; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 1.25rem; }
+    .card h3 { color: #94a3b8; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem; }
+    .card .value { font-size: 1.1rem; word-break: break-all; }
+    .ok { color: #86efac; }
+    .warn { color: #fbbf24; }
+    .err { color: #f87171; }
+    code { font-family: monospace; background: #0f172a; padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+  <h1>🌐 Browser Storage Info</h1>
+  <div class="grid" id="cards"></div>
+
+  <script>
+    async function getEstimate() {
+      if (!navigator.storage?.estimate) return null;
+      try { return await navigator.storage.estimate(); } catch { return null; }
+    }
+
+    function check(label, testFn) {
+      try { testFn(); return { label, ok: true }; }
+      catch(e) { return { label, ok: false, err: e.message }; }
+    }
+
+    function addCard(title, valueHtml, cls = '') {
+      const el = document.createElement('div');
+      el.className = 'card';
+      el.innerHTML = `<h3>${title}</h3><div class="value ${cls}">${valueHtml}</div>`;
+      document.getElementById('cards').appendChild(el);
+    }
+
+    // Availability checks
+    ['localStorage', 'sessionStorage'].forEach(name => {
+      const r = check(name, () => {
+        const t = '__t__';
+        window[name].setItem(t, t);
+        window[name].removeItem(t);
+      });
+      addCard(name, r.ok ? '✅ Available' : `❌ ${r.err}`, r.ok ? 'ok' : 'err');
+    });
+
+    addCard('Cookies', navigator.cookieEnabled ? '✅ Enabled' : '❌ Disabled', navigator.cookieEnabled ? 'ok' : 'err');
+    addCard('IndexedDB', 'indexedDB' in window ? '✅ Available' : '❌ Not available', 'indexedDB' in window ? 'ok' : 'err');
+
+    addCard('Private / Incognito', '⚠️ Cannot detect reliably — storage may be cleared on close', 'warn');
+    addCard('User Agent', navigator.userAgent, '');
+
+    // Async quota
+    getEstimate().then(est => {
+      if (!est) { addCard('Storage Quota', 'navigator.storage.estimate() not available', 'warn'); return; }
+      const used = (est.usage / 1048576).toFixed(2);
+      const quota = (est.quota / 1048576).toFixed(0);
+      addCard('Storage Quota', `${used} MB used of ~${quota} MB`, 'ok');
+    });
+
+    // Current counts
+    addCard('localStorage items', `<code>${localStorage.length}</code> keys stored`, '');
+    addCard('sessionStorage items', `<code>${sessionStorage.length}</code> keys stored`, '');
+    const ccount = document.cookie ? document.cookie.split(';').filter(Boolean).length : 0;
+    addCard('Cookies (this origin)', `<code>${ccount}</code> cookies`, '');
+  </script>
+</body>
+</html>
