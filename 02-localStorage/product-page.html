@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>localStorage Demo — Product Page</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>🛍️ Product Page</h1>
+  <p class="subtitle">Data persists in localStorage — close the browser and come back, your favorites and ratings will still be here.</p>
+
+  <div class="toolbar">
+    <button class="btn-primary" id="themeBtn" onclick="toggleDark()">☀️ Light Mode</button>
+    <button class="btn-secondary" onclick="clearAll()">🗑️ Clear All Data</button>
+  </div>
+
+  <div class="products" id="products"></div>
+
+  <div class="history-panel" id="historyPanel" style="display:none">
+    <h3>📜 View History (localStorage)</h3>
+    <div class="history-list" id="historyList"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
