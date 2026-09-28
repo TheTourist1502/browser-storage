@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cache Storage</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>⚡ Cache Storage</h1>
+  <p class="subtitle">Service Worker Cache API — offline-first PWA asset caching</p>
+
+  <div class="note">
+    <strong>ℹ️ Live API:</strong> This page uses the real <code>CacheStorage</code> API (available without a Service Worker in secure contexts).
+  </div>
+
+  <section class="card">
+    <h2>Real-World Example: News PWA</h2>
+    <p class="desc">A news app caches article HTML/JSON/images so they load instantly offline. Each cache version is named — old versions are deleted on SW update.</p>
+
+    <div class="row">
+      <div class="half">
+        <h3>📥 Cache a Resource</h3>
+        <input id="cacheUrl" placeholder="https://jsonplaceholder.typicode.com/posts/1" value="https://jsonplaceholder.typicode.com/posts/1" />
+        <input id="cacheName" placeholder="Cache name" value="news-v1" />
+        <button onclick="cacheResource()">Fetch & Cache</button>
+        <p id="cacheMsg" class="msg"></p>
+      </div>
+      <div class="half">
+        <h3>🔍 Read from Cache</h3>
+        <input id="readUrl" placeholder="URL to read from cache" value="https://jsonplaceholder.typicode.com/posts/1" />
+        <input id="readCacheName" placeholder="Cache name" value="news-v1" />
+        <button onclick="readCache()">Read Cache</button>
+        <pre id="cacheResult" class="raw"></pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Manage Caches</h2>
+    <button onclick="listCaches()">List All Caches</button>
+    <button class="btn-bad" onclick="deleteAllCaches()">Delete All Caches</button>
+    <div id="cacheList" class="item-list"></div>
+  </section>
+
+  <section class="card">
+    <h2>How It Works</h2>
+    <table class="tbl">
+      <thead><tr><th>Step</th><th>Code</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>1. Open</td><td><code>caches.open('v1')</code></td><td>Create or open named cache</td></tr>
+        <tr><td>2. Store</td><td><code>cache.put(url, response)</code></td><td>Store fetch response</td></tr>
+        <tr><td>3. Match</td><td><code>caches.match(url)</code></td><td>Find cached response</td></tr>
+        <tr><td>4. Delete</td><td><code>caches.delete('v1')</code></td><td>Remove old cache version</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <script src="script.js"></script>
+</body>
+</html>

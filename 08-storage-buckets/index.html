@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Storage Buckets</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>🪣 Storage Buckets</h1>
+  <p class="subtitle">navigator.storageBuckets — isolated, eviction-controlled storage units (Chrome 122+)</p>
+
+  <div class="note">
+    <strong>⚠️ Limited Support:</strong> Storage Buckets API is available in Chrome 122+ only. This page shows a live demo where supported, and a visual simulation otherwise.
+  </div>
+
+  <section class="card">
+    <h2>Real-World Example: Video Editor App</h2>
+    <p class="desc">
+      A browser-based video editor uses separate buckets per project. The <code>drafts</code> bucket is eviction-friendly (cache-like),
+      while the <code>exports</code> bucket is marked persistent so the OS never auto-deletes finished renders.
+    </p>
+
+    <div class="row">
+      <div class="half">
+        <h3>🗂️ Create a Bucket</h3>
+        <input id="bucketName" placeholder="Bucket name (e.g. project-42)" value="project-42" />
+        <select id="bucketDurability">
+          <option value="relaxed">relaxed (cache-like, evictable)</option>
+          <option value="strict">strict (persistent, not evicted)</option>
+        </select>
+        <button onclick="createBucket()">Create Bucket</button>
+        <p id="bucketMsg" class="msg"></p>
+      </div>
+      <div class="half">
+        <h3>📝 Write to Bucket's localStorage</h3>
+        <input id="writeKey" placeholder="Key" value="timeline" />
+        <input id="writeVal" placeholder="Value" value='{"clips":3,"duration":120}' />
+        <button onclick="writeToBucket()">Write</button>
+        <button onclick="readFromBucket()">Read</button>
+        <pre id="bucketResult" class="raw"></pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Manage Buckets</h2>
+    <button onclick="listBuckets()">List Buckets</button>
+    <button class="btn-bad" onclick="deleteBucket()">Delete Selected Bucket</button>
+    <div id="bucketList" class="item-list"></div>
+  </section>
+
+  <section class="card">
+    <h2>Why Buckets?</h2>
+    <table class="tbl">
+      <thead><tr><th>Problem</th><th>Bucket Solution</th></tr></thead>
+      <tbody>
+        <tr><td>One localStorage for everything → key collisions</td><td>Each bucket has isolated localStorage/IDB/Cache</td></tr>
+        <tr><td>Browser evicts all origin storage at once</td><td>Per-bucket eviction policy (relaxed vs strict)</td></tr>
+        <tr><td>No way to scope storage by feature</td><td>Named buckets per project, user, or feature</td></tr>
+        <tr><td>Can't set storage quota per feature</td><td><code>quota</code> option limits bucket size</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <script src="script.js"></script>
+</body>
+</html>

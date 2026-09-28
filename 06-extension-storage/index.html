@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Extension Storage</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>🧩 Extension Storage</h1>
+  <p class="subtitle">chrome.storage.local / sync / session — used in browser extensions</p>
+
+  <div class="note">
+    <strong>⚠️ Simulated Demo:</strong> <code>chrome.storage</code> only works inside a real extension context.
+    This page simulates the API using <code>localStorage</code> with the same key/value model.
+  </div>
+
+  <section class="card">
+    <h2>Real-World Example: Tab Manager Extension</h2>
+    <p class="desc">Saves user's pinned tabs and preferences across browser restarts using <code>chrome.storage.sync</code> (synced across devices) and <code>chrome.storage.local</code> (large local data).</p>
+
+    <div class="row">
+      <div class="half">
+        <h3>📌 Pinned Tabs (sync storage)</h3>
+        <div class="input-row">
+          <input id="tabUrl" placeholder="https://example.com" />
+          <input id="tabTitle" placeholder="Tab title" />
+          <button onclick="pinTab()">Pin Tab</button>
+        </div>
+        <ul id="pinnedList" class="item-list"></ul>
+      </div>
+      <div class="half">
+        <h3>⚙️ Extension Preferences (local storage)</h3>
+        <label><input type="checkbox" id="darkMode" onchange="savePref()"> Dark mode</label><br>
+        <label><input type="checkbox" id="autoGroup" onchange="savePref()"> Auto-group tabs</label><br>
+        <label><input type="checkbox" id="badges" onchange="savePref()"> Show badge count</label>
+        <p class="saved-msg" id="prefMsg"></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Storage API Comparison</h2>
+    <table class="tbl">
+      <thead><tr><th>API</th><th>Scope</th><th>Synced</th><th>Quota</th><th>Use case</th></tr></thead>
+      <tbody>
+        <tr><td><code>chrome.storage.local</code></td><td>Device</td><td>No</td><td>10 MB+</td><td>Large data, cache</td></tr>
+        <tr><td><code>chrome.storage.sync</code></td><td>Account</td><td>Yes</td><td>100 KB</td><td>User settings, small prefs</td></tr>
+        <tr><td><code>chrome.storage.session</code></td><td>Session</td><td>No</td><td>10 MB</td><td>Temp state (MV3)</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2>Raw Storage View</h2>
+    <button onclick="clearAll()">Clear All</button>
+    <pre id="rawView" class="raw"></pre>
+  </section>
+
+  <script src="script.js"></script>
+</body>
+</html>
